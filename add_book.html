@@ -3,81 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thêm sách mới - Quản lý thư viện</title>
+    <title>Thêm sách mới - Thư viện H44</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #4285F4;
+            --secondary-color: #34A853;
+            --accent-color: #EA4335;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
         }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"], input[type="number"] {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
+        
+        header {
+            background-color: var(--primary-color);
             color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
+            padding: 1rem 0;
+            box-shadow: var(--box-shadow);
         }
-        button:hover {
-            background-color: #45a049;
+        
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 20px;
         }
-        #qrcode {
-            margin-top: 20px;
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
             text-align: center;
         }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
         .success {
-            color: green;
-            margin-top: 10px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        #qrcode {
+            margin: 2rem auto;
+            text-align: center;
+            padding: 1rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            max-width: 300px;
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Thêm sách mới vào thư viện</h1>
+    <header>
+        <nav>
+            <div class="logo">Thư Viện H44</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Trang chủ</a></li>
+                <li><a href="add_book.html">Thêm sách</a></li>
+                <li><a href="manage_books.html">Quản lý sách</a></li>
+                <li><a href="scan_book.html">Quét mã sách</a></li>
+                <li><a href="manage_borrow.html">Quản lý mượn</a></li>
+            </ul>
+        </nav>
+    </header>
     
-    <div class="form-group">
-        <label for="bookName">Tên sách:</label>
-        <input type="text" id="bookName" required>
+    <div class="container">
+        <div class="card">
+            <h1>Thêm sách mới vào thư viện</h1>
+            
+            <div id="message" class="message" style="display: none;"></div>
+            
+            <div class="form-group">
+                <label for="bookName">Tên sách:</label>
+                <input type="text" id="bookName" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="totalQuantity">Tổng số lượng:</label>
+                <input type="number" id="totalQuantity" min="1" value="1" required>
+            </div>
+            
+            <button id="addBookBtn" class="btn btn-block">Thêm sách</button>
+            
+            <div id="qrcode"></div>
+        </div>
     </div>
     
-    <div class="form-group">
-        <label for="totalQuantity">Tổng số lượng:</label>
-        <input type="number" id="totalQuantity" min="1" value="1" required>
-    </div>
-    
-    <button id="addBookBtn">Thêm sách</button>
-    
-    <div id="message" class="success"></div>
-    
-    <div id="qrcode"></div>
+    <footer>
+        <p>&copy; 2023 Hệ thống quản lý thư viện H44. All rights reserved.</p>
+    </footer>
     
     <script>
-        // Khởi tạo Firebase
+        // Khởi tạo Firebase với cấu hình của bạn
         const firebaseConfig = {
             apiKey: "AIzaSyBMNO5rEmCNS2en1eQ1_iv1Sks9w-0bkNA",
             authDomain: "h44-tl-235c9.firebaseapp.com",
             projectId: "h44-tl-235c9",
             storageBucket: "h44-tl-235c9.firebasestorage.app",
             messagingSenderId: "20760907411",
-            appId: "1:20760907411:web:20b3a1cc1fbfbf57c78766"
+            appId: "1:20760907411:web:20b3a1cc1fbfbf57c78766",
+            measurementId: "G-8JSWED9TPW"
         };
         
         // Khởi tạo Firebase
@@ -87,11 +255,18 @@
         document.getElementById('addBookBtn').addEventListener('click', addNewBook);
         
         async function addNewBook() {
-            const bookName = document.getElementById('bookName').value;
+            const bookName = document.getElementById('bookName').value.trim();
             const totalQuantity = parseInt(document.getElementById('totalQuantity').value);
+            const messageEl = document.getElementById('message');
             
-            if (!bookName || !totalQuantity) {
-                alert('Vui lòng điền đầy đủ thông tin');
+            // Validate input
+            if (!bookName || isNaN(totalQuantity) {
+                showMessage('Vui lòng điền đầy đủ thông tin', 'error');
+                return;
+            }
+            
+            if (totalQuantity <= 0) {
+                showMessage('Số lượng phải lớn hơn 0', 'error');
                 return;
             }
             
@@ -118,7 +293,7 @@
                 document.getElementById('qrcode').innerHTML = qr.createImgTag(4);
                 
                 // Hiển thị thông báo thành công
-                document.getElementById('message').textContent = `Đã thêm sách "${bookName}" thành công! Mã sách: ${bookId}`;
+                showMessage(`Đã thêm sách "${bookName}" thành công! Mã sách: ${bookId}`, 'success');
                 
                 // Reset form
                 document.getElementById('bookName').value = '';
@@ -126,12 +301,24 @@
                 
             } catch (error) {
                 console.error('Lỗi khi thêm sách:', error);
-                alert('Có lỗi xảy ra khi thêm sách. Vui lòng thử lại.');
+                showMessage('Có lỗi xảy ra khi thêm sách. Vui lòng thử lại.', 'error');
             }
         }
         
         function generateId() {
             return 'book-' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+            
+            // Ẩn thông báo sau 5 giây
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
         }
     </script>
 </body>
