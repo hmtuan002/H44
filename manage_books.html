@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sách - Thư viện</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .edit-btn, .save-btn, .cancel-btn {
+            padding: 5px 10px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .edit-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        .save-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+        }
+        .cancel-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            padding: 8px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quản lý sách trong thư viện</h1>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm sách...">
+        <button onclick="searchBooks()">Tìm kiếm</button>
+    </div>
+    
+    <table id="booksTable">
+        <thead>
+            <tr>
+                <th>Mã sách</th>
+                <th>Tên sách</th>
+                <th>Tổng số lượng</th>
+                <th>Đã mượn</th>
+                <th>Còn lại</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody id="booksList">
+            <!-- Dữ liệu sách sẽ được thêm vào đây -->
+        </tbody>
+    </table>
+    
+    <script>
+        // Khởi tạo Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Lấy danh sách sách
+        function fetchBooks(searchTerm = '') {
+            let query = db.collection('books');
+            
+            if (searchTerm) {
+                query = query.where('bookName', '>=', searchTerm)
+                            .where('bookName', '<=', searchTerm + '\uf8ff');
+            }
+            
+            query.onSnapshot((snapshot) => {
+                const booksList = document.getElementById('booksList');
+                booksList.innerHTML = '';
+                
+                snapshot.forEach((doc) => {
+                    const book = doc.data();
+                    const row = document.createElement('tr');
+                    row.dataset.id = doc.id;
+                    
+                    row.innerHTML = `
+                        <td>${book.bookId}</td>
+                        <td>${book.bookName}</td>
+                        <td>${book.totalQuantity}</td>
+                        <td>${book.borrowedQuantity}</td>
+                        <td>${book.availableQuantity}</td>
+                        <td>
+                            <button class="edit-btn" onclick="editBook('${doc.id}')">Sửa</button>
+                        </td>
+                    `;
+                    
+                    booksList.appendChild(row);
+                });
+            });
+        }
+        
+        // Tìm kiếm sách
+        function searchBooks() {
+            const searchTerm = document.getElementById('searchInput').value;
+            fetchBooks(searchTerm);
+        }
+        
+        // Chỉnh sửa sách
+        function editBook(bookId) {
+            const row = document.querySelector(`tr[data-id="${bookId}"]`);
+            const cells = row.cells;
+            
+            // Lưu giá trị hiện tại để có thể hủy
+            const originalValues = {
+                bookName: cells[1].textContent,
+                totalQuantity: cells[2].textContent
+            };
+            
+            // Tạo input fields để chỉnh sửa
+            cells[1].innerHTML = `<input type="text" value="${originalValues.bookName}" id="editName">`;
+            cells[2].innerHTML = `<input type="number" value="${originalValues.totalQuantity}" id="editTotal" min="1">`;
+            
+            // Thay đổi nút hành động
+            cells[5].innerHTML = `
+                <button class="save-btn" onclick="saveBook('${bookId}')">Lưu</button>
+                <button class="cancel-btn" onclick="cancelEdit('${bookId}', '${originalValues.bookName}', '${originalValues.totalQuantity}')">Hủy</button>
+            `;
+        }
+        
+        // Hủy chỉnh sửa
+        function cancelEdit(bookId, originalName, originalTotal) {
+            const row = document.querySelector(`tr[data-id="${bookId}"]`);
+            const cells = row.cells;
+            
+            cells[1].textContent = originalName;
+            cells[2].textContent = originalTotal;
+            
+            cells[5].innerHTML = `<button class="edit-btn" onclick="editBook('${bookId}')">Sửa</button>`;
+        }
+        
+        // Lưu thay đổi
+        async function saveBook(bookId) {
+            const newName = document.getElementById('editName').value;
+            const newTotal = parseInt(document.getElementById('editTotal').value);
+            
+            if (!newName || !newTotal) {
+                alert('Vui lòng điền đầy đủ thông tin');
+                return;
+            }
+            
+            try {
+                // Lấy thông tin sách hiện tại để tính toán lại số lượng
+                const bookDoc = await db.collection('books').doc(bookId).get();
+                const bookData = bookDoc.data();
+                
+                // Tính toán số lượng mới
+                const borrowed = bookData.borrowedQuantity || 0;
+                const newAvailable = newTotal - borrowed;
+                
+                // Cập nhật Firestore
+                await db.collection('books').doc(bookId).update({
+                    bookName: newName,
+                    totalQuantity: newTotal,
+                    availableQuantity: newAvailable
+                });
+                
+                // Tải lại danh sách
+                fetchBooks();
+                
+            } catch (error) {
+                console.error('Lỗi khi cập nhật sách:', error);
+                alert('Có lỗi xảy ra khi cập nhật sách. Vui lòng thử lại.');
+            }
+        }
+        
+        // Tải danh sách sách khi trang được tải
+        window.onload = fetchBooks;
+    </script>
+</body>
+</html>
