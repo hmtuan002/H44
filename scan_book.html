@@ -152,10 +152,6 @@
             transform: translateY(-2px);
         }
         
-        #scanBtn i {
-            margin-right: 8px;
-        }
-        
         .message {
             padding: 1rem;
             margin-bottom: 1rem;
@@ -250,20 +246,6 @@
             padding: 1.5rem 0;
             margin-top: 2rem;
         }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 15px;
-            }
-            
-            .book-info {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-        }
     </style>
 </head>
 <body>
@@ -299,7 +281,6 @@
             
             <div id="scannedBooks">
                 <h2><i class="fas fa-book"></i> Sách đã quét:</h2>
-                <!-- Danh sách sách đã quét sẽ hiển thị ở đây -->
             </div>
             
             <button id="confirmBtn" onclick="confirmBorrow()" disabled>
@@ -318,7 +299,7 @@
             apiKey: "AIzaSyBMNO5rEmCNS2en1eQ1_iv1Sks9w-0bkNA",
             authDomain: "h44-tl-235c9.firebaseapp.com",
             projectId: "h44-tl-235c9",
-            storageBucket: "h44-tl-235c9.firebasestorage.app",
+            storageBucket: "h44-tl-235c9.appspot.com",
             messagingSenderId: "20760907411",
             appId: "1:20760907411:web:20b3a1cc1fbfbf57c78766",
             measurementId: "G-8JSWED9TPW"
@@ -339,12 +320,10 @@
             const scannerOverlay = document.getElementById('scannerOverlay');
             
             if (scanning) {
-                // Dừng quét
                 stopScanner();
                 scanBtn.innerHTML = '<i class="fas fa-camera"></i> Bắt đầu quét';
                 scannerOverlay.style.display = 'flex';
             } else {
-                // Bắt đầu quét
                 startScanner();
                 scanBtn.innerHTML = '<i class="fas fa-stop"></i> Dừng quét';
                 scannerOverlay.style.display = 'none';
@@ -364,11 +343,9 @@
                 video.play();
                 messageEl.style.display = 'none';
                 
-                // Tạo canvas để phân tích hình ảnh
                 const canvas = document.createElement('canvas');
                 const canvasContext = canvas.getContext('2d');
                 
-                // Bắt đầu quét
                 scanFrame(video, canvas, canvasContext);
                 
             } catch (err) {
@@ -379,7 +356,9 @@
         
         function stopScanner() {
             if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
+                videoStream.getTracks().forEach(function(track) {
+                    track.stop();
+                });
                 videoStream = null;
             }
             
@@ -405,31 +384,35 @@
                     inversionAttempts: "dontInvert",
                 });
                 
-                if (code) {
-                    const bookId = code.data;
+                if (code && code.data && code.data.trim() !== '') {
+                    const bookId = code.data.trim();
                     if (!scannedBooks[bookId]) {
-                        // Kiểm tra xem sách có tồn tại không
                         checkBookExists(bookId);
                     }
                 }
             }
             
-            // Tiếp tục quét
-            animationFrameId = requestAnimationFrame(() => scanFrame(video, canvas, canvasContext));
+            animationFrameId = requestAnimationFrame(function() {
+                scanFrame(video, canvas, canvasContext);
+            });
         }
         
         async function checkBookExists(bookId) {
+            if (!bookId || bookId.trim() === '') {
+                console.error('Mã sách không hợp lệ');
+                return;
+            }
+
             try {
                 const doc = await db.collection('books').doc(bookId).get();
                 
                 if (doc.exists) {
                     const bookData = doc.data();
                     
-                    // Thêm vào danh sách sách đã quét nếu chưa có
                     if (!scannedBooks[bookId]) {
                         scannedBooks[bookId] = {
                             data: bookData,
-                            borrowQuantity: 1, // Mặc định mượn 1 cuốn
+                            borrowQuantity: 1,
                             borrowerName: '',
                             startDate: new Date().toISOString().split('T')[0],
                             duration: 7
@@ -533,30 +516,31 @@
         }
         
         function updateConfirmButton() {
-            const hasEmptyNames = Object.values(scannedBooks).some(
-                book => !book.borrowerName || book.borrowerName.trim() === ''
-            );
+            let hasEmptyNames = false;
+            for (const bookId in scannedBooks) {
+                if (!scannedBooks[bookId].borrowerName || scannedBooks[bookId].borrowerName.trim() === '') {
+                    hasEmptyNames = true;
+                    break;
+                }
+            }
             document.getElementById('confirmBtn').disabled = hasEmptyNames || Object.keys(scannedBooks).length === 0;
         }
         
         async function confirmBorrow() {
             const messageEl = document.getElementById('message');
             
-            // Kiểm tra xem có sách nào được quét không
             if (Object.keys(scannedBooks).length === 0) {
                 showMessage('Vui lòng quét ít nhất một cuốn sách', 'error');
                 return;
             }
             
             try {
-                // Tạo transaction để đảm bảo tính nhất quán dữ liệu
                 const batch = db.batch();
                 const borrowDate = new Date();
                 const borrowId = 'borrow-' + Math.random().toString(36).substr(2, 9);
                 const borrowItems = [];
                 let borrowerName = '';
                 
-                // Kiểm tra và cập nhật từng sách
                 for (const bookId in scannedBooks) {
                     const bookRef = db.collection('books').doc(bookId);
                     const bookDoc = await bookRef.get();
@@ -577,7 +561,6 @@
                         return;
                     }
                     
-                    // Thêm vào danh sách mượn
                     borrowItems.push({
                         bookId: bookId,
                         bookName: bookData.bookName,
@@ -586,14 +569,12 @@
                         duration: parseInt(duration)
                     });
                     
-                    // Cập nhật số lượng sách
                     batch.update(bookRef, {
                         borrowedQuantity: firebase.firestore.FieldValue.increment(borrowQty),
                         availableQuantity: firebase.firestore.FieldValue.increment(-borrowQty)
                     });
                 }
                 
-                // Thêm hồ sơ mượn
                 const borrowRef = db.collection('borrowRecords').doc(borrowId);
                 batch.set(borrowRef, {
                     borrowId: borrowId,
@@ -603,20 +584,16 @@
                     status: 'active'
                 });
                 
-                // Thực hiện batch write
                 await batch.commit();
                 
-                // Hiển thị thông báo thành công
                 showMessage('Đã ghi nhận mượn sách thành công!', 'success');
                 
-                // Xóa danh sách đã quét
                 for (const bookId in scannedBooks) {
                     delete scannedBooks[bookId];
                 }
                 document.getElementById('scannedBooks').innerHTML = '<h2><i class="fas fa-book"></i> Sách đã quét:</h2>';
                 document.getElementById('confirmBtn').disabled = true;
                 
-                // Dừng quét nếu đang bật
                 if (scanning) {
                     toggleScanner();
                 }
@@ -630,17 +607,15 @@
         function showMessage(text, type) {
             const messageEl = document.getElementById('message');
             messageEl.textContent = text;
-            messageEl.className = `message ${type}`;
+            messageEl.className = 'message ' + type;
             messageEl.style.display = 'block';
             
-            // Ẩn thông báo sau 5 giây
-            setTimeout(() => {
+            setTimeout(function() {
                 messageEl.style.display = 'none';
             }, 5000);
         }
         
-        // Dừng quét khi trang bị đóng
-        window.addEventListener('beforeunload', () => {
+        window.addEventListener('beforeunload', function() {
             stopScanner();
         });
     </script>
