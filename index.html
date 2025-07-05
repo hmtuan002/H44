@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ thống quản lý thư viện</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary-color: #4285F4;
@@ -40,6 +41,7 @@
             color: white;
             padding: 1rem 0;
             box-shadow: var(--box-shadow);
+            position: relative;
         }
         
         nav {
@@ -69,10 +71,61 @@
             padding: 0.5rem 1rem;
             border-radius: var(--border-radius);
             transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .nav-links a:hover {
             background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            width: 250px;
+            border-radius: 0 0 0 var(--border-radius);
+            box-shadow: -2px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            overflow: hidden;
+        }
+        
+        .mobile-menu.open {
+            display: block;
+        }
+        
+        .mobile-menu ul {
+            list-style: none;
+        }
+        
+        .mobile-menu li {
+            border-bottom: 1px solid #eee;
+        }
+        
+        .mobile-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 1rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .mobile-menu a:hover {
+            background-color: #f5f5f5;
         }
         
         .hero {
@@ -95,7 +148,9 @@
         }
         
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             background-color: white;
             color: var(--primary-color);
             padding: 0.8rem 1.5rem;
@@ -144,6 +199,9 @@
         .feature-card h3 {
             color: var(--primary-color);
             margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         footer {
@@ -159,8 +217,17 @@
                 display: none;
             }
             
+            .mobile-menu-btn {
+                display: block;
+            }
+            
             .hero h1 {
                 font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+                padding: 0 1rem;
             }
         }
     </style>
@@ -171,12 +238,24 @@
             <nav>
                 <div class="logo">Thư Viện H44</div>
                 <ul class="nav-links">
-                    <li><a href="index.html">Trang chủ</a></li>
-                    <li><a href="add_book.html">Thêm sách</a></li>
-                    <li><a href="manage_books.html">Quản lý sách</a></li>
-                    <li><a href="scan_book.html">Quét mã sách</a></li>
-                    <li><a href="manage_borrow.html">Quản lý mượn</a></li>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Trang chủ</a></li>
+                    <li><a href="add_book.html"><i class="fas fa-book-medical"></i> Thêm sách</a></li>
+                    <li><a href="manage_books.html"><i class="fas fa-book"></i> Quản lý sách</a></li>
+                    <li><a href="scan_book.html"><i class="fas fa-qrcode"></i> Quét mã sách</a></li>
+                    <li><a href="manage_borrow.html"><i class="fas fa-clipboard-list"></i> Quản lý mượn</a></li>
                 </ul>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="mobile-menu" id="mobileMenu">
+                    <ul>
+                        <li><a href="index.html"><i class="fas fa-home"></i> Trang chủ</a></li>
+                        <li><a href="add_book.html"><i class="fas fa-book-medical"></i> Thêm sách</a></li>
+                        <li><a href="manage_books.html"><i class="fas fa-book"></i> Quản lý sách</a></li>
+                        <li><a href="scan_book.html"><i class="fas fa-qrcode"></i> Quét mã sách</a></li>
+                        <li><a href="manage_borrow.html"><i class="fas fa-clipboard-list"></i> Quản lý mượn</a></li>
+                    </ul>
+                </div>
             </nav>
         </div>
     </header>
@@ -185,22 +264,24 @@
         <div class="container">
             <h1>Hệ thống quản lý thư viện hiện đại</h1>
             <p>Giải pháp toàn diện cho việc quản lý sách và mượn trả trong thư viện với công nghệ tiên tiến</p>
-            <a href="add_book.html" class="btn btn-primary">Bắt đầu ngay</a>
+            <a href="add_book.html" class="btn btn-primary">
+                <i class="fas fa-play"></i> Bắt đầu ngay
+            </a>
         </div>
     </section>
     
     <div class="container">
         <section class="features">
             <div class="feature-card">
-                <h3>Thêm sách dễ dàng</h3>
+                <h3><i class="fas fa-book-medical"></i> Thêm sách dễ dàng</h3>
                 <p>Thêm sách mới vào hệ thống nhanh chóng với thông tin đầy đủ và tự động tạo mã QR cho từng đầu sách.</p>
             </div>
             <div class="feature-card">
-                <h3>Quản lý kho sách</h3>
+                <h3><i class="fas fa-tasks"></i> Quản lý kho sách</h3>
                 <p>Theo dõi số lượng sách, tình trạng mượn trả và cập nhật thông tin sách một cách dễ dàng.</p>
             </div>
             <div class="feature-card">
-                <h3>Quét mã QR tiện lợi</h3>
+                <h3><i class="fas fa-camera"></i> Quét mã QR tiện lợi</h3>
                 <p>Sử dụng camera để quét mã QR trên sách và thực hiện các thao tác mượn/trả chỉ trong vài giây.</p>
             </div>
         </section>
@@ -211,5 +292,22 @@
             <p>&copy; 2023 Hệ thống quản lý thư viện H44. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileMenu.classList.toggle('open');
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!mobileMenu.contains(event.target) && event.target !== mobileMenuBtn) {
+                mobileMenu.classList.remove('open');
+            }
+        });
+    </script>
 </body>
 </html>
