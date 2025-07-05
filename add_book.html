@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm sách mới - Quản lý thư viện</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #qrcode {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Thêm sách mới vào thư viện</h1>
+    
+    <div class="form-group">
+        <label for="bookName">Tên sách:</label>
+        <input type="text" id="bookName" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="totalQuantity">Tổng số lượng:</label>
+        <input type="number" id="totalQuantity" min="1" value="1" required>
+    </div>
+    
+    <button id="addBookBtn">Thêm sách</button>
+    
+    <div id="message" class="success"></div>
+    
+    <div id="qrcode"></div>
+    
+    <script>
+        // Khởi tạo Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        // Khởi tạo Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        document.getElementById('addBookBtn').addEventListener('click', addNewBook);
+        
+        async function addNewBook() {
+            const bookName = document.getElementById('bookName').value;
+            const totalQuantity = parseInt(document.getElementById('totalQuantity').value);
+            
+            if (!bookName || !totalQuantity) {
+                alert('Vui lòng điền đầy đủ thông tin');
+                return;
+            }
+            
+            try {
+                // Tạo ID ngẫu nhiên cho sách
+                const bookId = generateId();
+                
+                // Thêm sách vào Firestore
+                await db.collection('books').doc(bookId).set({
+                    bookName: bookName,
+                    totalQuantity: totalQuantity,
+                    borrowedQuantity: 0,
+                    availableQuantity: totalQuantity,
+                    bookId: bookId,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Tạo mã QR
+                const qr = qrcode(0, 'L');
+                qr.addData(bookId);
+                qr.make();
+                
+                // Hiển thị mã QR
+                document.getElementById('qrcode').innerHTML = qr.createImgTag(4);
+                
+                // Hiển thị thông báo thành công
+                document.getElementById('message').textContent = `Đã thêm sách "${bookName}" thành công! Mã sách: ${bookId}`;
+                
+                // Reset form
+                document.getElementById('bookName').value = '';
+                document.getElementById('totalQuantity').value = '1';
+                
+            } catch (error) {
+                console.error('Lỗi khi thêm sách:', error);
+                alert('Có lỗi xảy ra khi thêm sách. Vui lòng thử lại.');
+            }
+        }
+        
+        function generateId() {
+            return 'book-' + Math.random().toString(36).substr(2, 9);
+        }
+    </script>
+</body>
+</html>
