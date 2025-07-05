@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quét mã sách - Thư viện</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        #scanner {
+            width: 100%;
+            border: 2px solid #333;
+        }
+        #scanBtn {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #scanBtn:hover {
+            background-color: #45a049;
+        }
+        #scannedBooks {
+            margin-top: 30px;
+        }
+        .book-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .borrow-form {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        input, button {
+            margin: 5px 0;
+        }
+        #confirmBtn {
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #confirmBtn:hover {
+            background-color: #0b7dda;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quét mã sách</h1>
+    
+    <div class="scanner-container">
+        <video id="scanner" playsinline></video>
+        <button id="scanBtn">Bắt đầu quét</button>
+    </div>
+    
+    <div id="message" class="error"></div>
+    
+    <div id="scannedBooks">
+        <h2>Sách đã quét:</h2>
+        <!-- Danh sách sách đã quét sẽ hiển thị ở đây -->
+    </div>
+    
+    <button id="confirmBtn" onclick="confirmBorrow()">Xác nhận cho mượn</button>
+    
+    <script>
+        // Khởi tạo Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Biến toàn cục
+        let scanning = false;
+        let videoStream = null;
+        const scannedBooks = {};
+        
+        // Bắt đầu/quét dừng quét
+        document.getElementById('scanBtn').addEventListener('click', toggleScanner);
+        
+        function toggleScanner() {
+            const scanBtn = document.getElementById('scanBtn');
+            
+            if (scanning) {
+                // Dừng quét
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                    videoStream = null;
+                }
+                document.getElementById('scanner').srcObject = null;
+                scanBtn.textContent = 'Bắt đầu quét';
+                scanning = false;
+            } else {
+                // Bắt đầu quét
+                startScanner();
+                scanBtn.textContent = 'Dừng quét';
+                scanning = true;
+            }
+        }
+        
+        async function startScanner() {
+            const video = document.getElementById('scanner');
+            const messageEl = document.getElementById('message');
+            
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" } 
+                });
+                video.srcObject = videoStream;
+                video.play();
+                messageEl.textContent = '';
+                
+                // Tạo canvas để phân tích hình ảnh
+                const canvas = document.createElement('canvas');
+                const canvasContext = canvas.getContext('2d');
+                
+                // Bắt đầu quét
+                scanFrame(video, canvas, canvasContext);
+                
+            } catch (err) {
+                console.error('Lỗi khi truy cập camera:', err);
+                messageEl.textContent = 'Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.';
+            }
+        }
+        
+        function scanFrame(video, canvas, canvasContext) {
+            if (!scanning) return;
+            
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+                
+                if (code) {
+                    const bookId = code.data;
+                    if (!scannedBooks[bookId]) {
+                        // Kiểm tra xem sách có tồn tại không
+                        checkBookExists(bookId);
+                    }
+                }
+            }
+            
+            // Tiếp tục quét
+            requestAnimationFrame(() => scanFrame(video, canvas, canvasContext));
+        }
+        
+        async function checkBookExists(bookId) {
+            try {
+                const doc = await db.collection('books').doc(bookId).get();
+                
+                if (doc.exists) {
+                    const bookData = doc.data();
+                    
+                    // Thêm vào danh sách sách đã quét nếu chưa có
+                    if (!scannedBooks[bookId]) {
+                        scannedBooks[bookId] = {
+                            data: bookData,
+                            borrowQuantity: 1 // Mặc định mượn 1 cuốn
+                        };
+                        displayScannedBooks();
+                    }
+                } else {
+                    document.getElementById('message').textContent = `Không tìm thấy sách với mã ${bookId}`;
+                }
+            } catch (error) {
+                console.error('Lỗi khi kiểm tra sách:', error);
+                document.getElementById('message').textContent = 'Có lỗi xảy ra khi kiểm tra sách';
+            }
+        }
+        
+        function displayScannedBooks() {
+            const container = document.getElementById('scannedBooks');
+            let html = '<h2>Sách đã quét:</h2>';
+            
+            for (const bookId in scannedBooks) {
+                const book = scannedBooks[bookId].data;
+                const borrowQty = scannedBooks[bookId].borrowQuantity;
+                
+                html += `
+                    <div class="book-item" data-id="${bookId}">
+                        <h3>${book.bookName}</h3>
+                        <p>Mã sách: ${bookId}</p>
+                        <p>Tổng số lượng: ${book.totalQuantity}</p>
+                        <p>Đã mượn: ${book.borrowedQuantity}</p>
+                        <p>Còn lại: ${book.availableQuantity}</p>
+                        
+                        <div class="borrow-form">
+                            <label for="borrower-${bookId}">Người mượn:</label>
+                            <input type="text" id="borrower-${bookId}" placeholder="Tên người mượn">
+                            
+                            <label for="quantity-${bookId}">Số lượng mượn:</label>
+                            <input type="number" id="quantity-${bookId}" 
+                                   min="1" max="${book.availableQuantity}" 
+                                   value="${borrowQty}"
+                                   onchange="updateBorrowQuantity('${bookId}', this.value)">
+                                   
+                            <label for="startDate-${bookId}">Ngày bắt đầu:</label>
+                            <input type="date" id="startDate-${bookId}" value="${new Date().toISOString().split('T')[0]}">
+                            
+                            <label for="duration-${bookId}">Thời gian mượn (ngày):</label>
+                            <input type="number" id="duration-${bookId}" min="1" value="7">
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function updateBorrowQuantity(bookId, quantity) {
+            if (scannedBooks[bookId]) {
+                scannedBooks[bookId].borrowQuantity = parseInt(quantity);
+            }
+        }
+        
+        async function confirmBorrow() {
+            const messageEl = document.getElementById('message');
+            
+            // Kiểm tra xem có sách nào được quét không
+            if (Object.keys(scannedBooks).length === 0) {
+                messageEl.textContent = 'Vui lòng quét ít nhất một cuốn sách';
+                return;
+            }
+            
+            try {
+                // Tạo transaction để đảm bảo tính nhất quán dữ liệu
+                const batch = db.batch();
+                const borrowDate = new Date();
+                const borrowId = 'borrow-' + Math.random().toString(36).substr(2, 9);
+                const borrowItems = [];
+                
+                // Kiểm tra và cập nhật từng sách
+                for (const bookId in scannedBooks) {
+                    const bookRef = db.collection('books').doc(bookId);
+                    const bookDoc = await bookRef.get();
+                    const bookData = bookDoc.data();
+                    
+                    const borrowQty = scannedBooks[bookId].borrowQuantity;
+                    const borrowerName = document.getElementById(`borrower-${bookId}`).value;
+                    const startDate = document.getElementById(`startDate-${bookId}`).value;
+                    const duration = document.getElementById(`duration-${bookId}`).value;
+                    
+                    if (!borrowerName) {
+                        messageEl.textContent = 'Vui lòng nhập tên người mượn cho tất cả sách';
+                        return;
+                    }
+                    
+                    if (borrowQty > bookData.availableQuantity) {
+                        messageEl.textContent = `Số lượng mượn vượt quá số lượng có sẵn cho sách ${bookData.bookName}`;
+                        return;
+                    }
+                    
+                    // Thêm vào danh sách mượn
+                    borrowItems.push({
+                        bookId: bookId,
+                        bookName: bookData.bookName,
+                        quantity: borrowQty,
+                        startDate: startDate,
+                        duration: parseInt(duration)
+                    });
+                    
+                    // Cập nhật số lượng sách
+                    batch.update(bookRef, {
+                        borrowedQuantity: firebase.firestore.FieldValue.increment(borrowQty),
+                        availableQuantity: firebase.firestore.FieldValue.increment(-borrowQty)
+                    });
+                }
+                
+                // Thêm hồ sơ mượn
+                const borrowRef = db.collection('borrowRecords').doc(borrowId);
+                batch.set(borrowRef, {
+                    borrowId: borrowId,
+                    borrowerName: document.getElementById(`borrower-${Object.keys(scannedBooks)[0]}`).value,
+                    borrowDate: firebase.firestore.Timestamp.fromDate(borrowDate),
+                    items: borrowItems,
+                    status: 'active'
+                });
+                
+                // Thực hiện batch write
+                await batch.commit();
+                
+                // Hiển thị thông báo thành công
+                messageEl.textContent = 'Đã ghi nhận mượn sách thành công!';
+                messageEl.className = 'success';
+                
+                // Xóa danh sách đã quét
+                for (const bookId in scannedBooks) {
+                    delete scannedBooks[bookId];
+                }
+                document.getElementById('scannedBooks').innerHTML = '<h2>Sách đã quét:</h2>';
+                
+            } catch (error) {
+                console.error('Lỗi khi xác nhận mượn sách:', error);
+                messageEl.textContent = 'Có lỗi xảy ra khi xác nhận mượn sách. Vui lòng thử lại.';
+                messageEl.className = 'error';
+            }
+        }
+    </script>
+</body>
+</html>
