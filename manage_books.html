@@ -420,4 +420,34 @@
                 }
                 
                 // Cập nhật Firestore
-                await db.co
+                await db.collection('books').doc(bookId).update({
+                    bookName: newName,
+                    totalQuantity: newTotal,
+                    availableQuantity: newAvailable
+                });
+                
+                showMessage('Đã cập nhật thông tin sách thành công', 'success');
+                
+            } catch (error) {
+                console.error('Lỗi khi cập nhật sách:', error);
+                showMessage('Có lỗi xảy ra khi cập nhật sách. Vui lòng thử lại.', 'error');
+            }
+        }
+        
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+            
+            // Ẩn thông báo sau 5 giây
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Tải danh sách sách khi trang được tải
+        window.onload = fetchBooks;
+    </script>
+</body>
+</html>
