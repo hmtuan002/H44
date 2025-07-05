@@ -37,6 +37,7 @@
             color: white;
             padding: 1rem 0;
             box-shadow: var(--box-shadow);
+            position: relative;
         }
         
         .container {
@@ -75,10 +76,61 @@
             padding: 0.5rem 1rem;
             border-radius: var(--border-radius);
             transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .nav-links a:hover {
             background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            width: 250px;
+            border-radius: 0 0 0 var(--border-radius);
+            box-shadow: -2px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            overflow: hidden;
+        }
+        
+        .mobile-menu.open {
+            display: block;
+        }
+        
+        .mobile-menu ul {
+            list-style: none;
+        }
+        
+        .mobile-menu li {
+            border-bottom: 1px solid #eee;
+        }
+        
+        .mobile-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 1rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .mobile-menu a:hover {
+            background-color: #f5f5f5;
         }
         
         .card {
@@ -93,6 +145,10 @@
             color: var(--primary-color);
             margin-bottom: 1.5rem;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .search-container {
@@ -117,6 +173,9 @@
             border-radius: var(--border-radius);
             cursor: pointer;
             transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .search-container button:hover {
@@ -135,6 +194,7 @@
             border: 1px solid #ddd;
             border-radius: var(--border-radius);
             font-size: 1rem;
+            width: 100%;
         }
         
         table {
@@ -177,6 +237,9 @@
             transition: all 0.3s;
             border: none;
             margin-right: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .btn-detail {
@@ -254,6 +317,9 @@
         .modal-title {
             color: var(--primary-color);
             margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         .borrow-info {
@@ -262,6 +328,13 @@
         
         .borrow-info p {
             margin-bottom: 0.5rem;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .borrow-info strong {
+            min-width: 120px;
+            display: inline-block;
         }
         
         .items-list {
@@ -278,6 +351,9 @@
         .item-card h4 {
             color: var(--primary-color);
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         footer {
@@ -302,9 +378,36 @@
                 display: none;
             }
             
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-container button {
+                justify-content: center;
+                padding: 0.8rem;
+            }
+            
             .modal-content {
                 width: 95%;
                 margin: 10% auto;
+                padding: 1rem;
+            }
+            
+            .borrow-info p {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .borrow-info strong {
+                min-width: auto;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
             }
         }
     </style>
@@ -314,12 +417,24 @@
         <nav>
             <div class="logo">Thư Viện H44</div>
             <ul class="nav-links">
-                <li><a href="index.html">Trang chủ</a></li>
-                <li><a href="add_book.html">Thêm sách</a></li>
-                <li><a href="manage_books.html">Quản lý sách</a></li>
-                <li><a href="scan_book.html">Quét mã sách</a></li>
-                <li><a href="manage_borrow.html">Quản lý mượn</a></li>
+                <li><a href="index.html"><i class="fas fa-home"></i> Trang chủ</a></li>
+                <li><a href="add_book.html"><i class="fas fa-book-medical"></i> Thêm sách</a></li>
+                <li><a href="manage_books.html"><i class="fas fa-book"></i> Quản lý sách</a></li>
+                <li><a href="scan_book.html"><i class="fas fa-qrcode"></i> Quét mã sách</a></li>
+                <li><a href="manage_borrow.html"><i class="fas fa-clipboard-list"></i> Quản lý mượn</a></li>
             </ul>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="mobile-menu" id="mobileMenu">
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Trang chủ</a></li>
+                    <li><a href="add_book.html"><i class="fas fa-book-medical"></i> Thêm sách</a></li>
+                    <li><a href="manage_books.html"><i class="fas fa-book"></i> Quản lý sách</a></li>
+                    <li><a href="scan_book.html"><i class="fas fa-qrcode"></i> Quét mã sách</a></li>
+                    <li><a href="manage_borrow.html"><i class="fas fa-clipboard-list"></i> Quản lý mượn</a></li>
+                </ul>
+            </div>
         </nav>
     </header>
     
@@ -331,7 +446,7 @@
             
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên người mượn...">
-                <button onclick="searchBorrowRecords()"><i class="fas fa-search"></i></button>
+                <button onclick="searchBorrowRecords()"><i class="fas fa-search"></i> Tìm kiếm</button>
             </div>
             
             <div class="filter-container">
@@ -366,7 +481,7 @@
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
-            <h2 class="modal-title">Chi tiết phiếu mượn</h2>
+            <h2 class="modal-title"><i class="fas fa-info-circle"></i> Chi tiết phiếu mượn</h2>
             <div id="modalContent"></div>
         </div>
     </div>
@@ -390,6 +505,21 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileMenu.classList.toggle('open');
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!mobileMenu.contains(event.target) && event.target !== mobileMenuBtn) {
+                mobileMenu.classList.remove('open');
+            }
+        });
+
         // Lấy danh sách mượn sách
         function fetchBorrowRecords(searchTerm = '', status = 'all') {
             let query = db.collection('borrowRecords').orderBy('borrowDate', 'desc');
@@ -491,31 +621,31 @@
                     if (record.returnDate) {
                         const returnDate = record.returnDate.toDate();
                         returnDateInfo = `
-                            <p><strong>Ngày trả:</strong> ${returnDate.toLocaleDateString('vi-VN')}</p>
+                            <p><strong><i class="fas fa-calendar-check"></i> Ngày trả:</strong> ${returnDate.toLocaleDateString('vi-VN')}</p>
                         `;
                     }
                     
                     let html = `
                         <div class="borrow-info">
-                            <p><strong>Mã phiếu mượn:</strong> ${record.borrowId}</p>
-                            <p><strong>Người mượn:</strong> ${record.borrowerName}</p>
-                            <p><strong>Ngày mượn:</strong> ${formattedBorrowDate}</p>
+                            <p><strong><i class="fas fa-id-card"></i> Mã phiếu mượn:</strong> ${record.borrowId}</p>
+                            <p><strong><i class="fas fa-user"></i> Người mượn:</strong> ${record.borrowerName}</p>
+                            <p><strong><i class="fas fa-calendar-alt"></i> Ngày mượn:</strong> ${formattedBorrowDate}</p>
                             ${returnDateInfo}
-                            <p><strong>Trạng thái:</strong> <span class="status-${record.status}">${record.status === 'active' ? 'Đang mượn' : 'Đã trả'}</span></p>
+                            <p><strong><i class="fas fa-info-circle"></i> Trạng thái:</strong> <span class="status-${record.status}">${record.status === 'active' ? 'Đang mượn' : 'Đã trả'}</span></p>
                         </div>
                         
-                        <h3 class="modal-title">Danh sách sách mượn</h3>
+                        <h3 class="modal-title"><i class="fas fa-book"></i> Danh sách sách mượn</h3>
                         <div class="items-list">
                     `;
                     
                     record.items.forEach((item, index) => {
                         html += `
                             <div class="item-card">
-                                <h4>${index + 1}. ${item.bookName}</h4>
-                                <p><strong>Mã sách:</strong> ${item.bookId}</p>
-                                <p><strong>Số lượng:</strong> ${item.quantity}</p>
-                                <p><strong>Ngày bắt đầu:</strong> ${item.startDate}</p>
-                                <p><strong>Thời gian mượn:</strong> ${item.duration} ngày</p>
+                                <h4><i class="fas fa-book-open"></i> ${index + 1}. ${item.bookName}</h4>
+                                <p><strong><i class="fas fa-barcode"></i> Mã sách:</strong> ${item.bookId}</p>
+                                <p><strong><i class="fas fa-copy"></i> Số lượng:</strong> ${item.quantity}</p>
+                                <p><strong><i class="fas fa-calendar-day"></i> Ngày bắt đầu:</strong> ${item.startDate}</p>
+                                <p><strong><i class="fas fa-clock"></i> Thời gian mượn:</strong> ${item.duration} ngày</p>
                             </div>
                         `;
                     });
