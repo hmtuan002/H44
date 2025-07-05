@@ -18,6 +18,7 @@
             --dark-color: #343a40;
             --border-radius: 8px;
             --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
         
         * {
@@ -38,6 +39,7 @@
             color: white;
             padding: 1rem 0;
             box-shadow: var(--box-shadow);
+            position: relative;
         }
         
         .container {
@@ -58,6 +60,12 @@
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
         }
         
         .nav-links {
@@ -75,11 +83,24 @@
             font-weight: 500;
             padding: 0.5rem 1rem;
             border-radius: var(--border-radius);
-            transition: background-color 0.3s;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-links a i {
+            margin-right: 8px;
         }
         
         .nav-links a:hover {
             background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 10px;
         }
         
         .card {
@@ -94,6 +115,13 @@
             color: var(--primary-color);
             margin-bottom: 1.5rem;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        h1 i {
+            margin-right: 15px;
         }
         
         .scanner-container {
@@ -144,7 +172,14 @@
             font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #scanBtn i {
+            margin-right: 8px;
         }
         
         #scanBtn:hover {
@@ -157,6 +192,13 @@
             margin-bottom: 1rem;
             border-radius: var(--border-radius);
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .message i {
+            margin-right: 10px;
         }
         
         .error {
@@ -180,6 +222,12 @@
         .book-card h3 {
             color: var(--primary-color);
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .book-card h3 i {
+            margin-right: 10px;
         }
         
         .book-info {
@@ -211,6 +259,7 @@
             padding: 0.6rem;
             border: 1px solid #ddd;
             border-radius: var(--border-radius);
+            font-family: inherit;
         }
         
         #confirmBtn {
@@ -226,7 +275,14 @@
             font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #confirmBtn i {
+            margin-right: 8px;
         }
         
         #confirmBtn:hover {
@@ -246,18 +302,91 @@
             padding: 1.5rem 0;
             margin-top: 2rem;
         }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                background-color: var(--primary-color);
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem 0;
+                transition: var(--transition);
+                z-index: 1000;
+            }
+            
+            .nav-links.active {
+                left: 0;
+            }
+            
+            .nav-links li {
+                margin: 1rem 0;
+            }
+            
+            .nav-links a {
+                font-size: 1.2rem;
+                padding: 1rem 2rem;
+            }
+            
+            .hamburger {
+                display: block;
+            }
+            
+            .book-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .scanner-container {
+                max-width: 100%;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            #scanBtn, #confirmBtn {
+                max-width: 100%;
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
         <nav>
-            <div class="logo">Thư Viện H44</div>
-            <ul class="nav-links">
-                <li><a href="index.html">Trang chủ</a></li>
-                <li><a href="add_book.html">Thêm sách</a></li>
-                <li><a href="manage_books.html">Quản lý sách</a></li>
-                <li><a href="scan_book.html">Quét mã sách</a></li>
-                <li><a href="manage_borrow.html">Quản lý mượn</a></li>
+            <div class="logo">
+                <i class="fas fa-book-open"></i>
+                <span>Thư Viện H44</span>
+            </div>
+            
+            <div class="hamburger" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
+            
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html"><i class="fas fa-home"></i> Trang chủ</a></li>
+                <li><a href="add_book.html"><i class="fas fa-plus-circle"></i> Thêm sách</a></li>
+                <li><a href="manage_books.html"><i class="fas fa-tasks"></i> Quản lý sách</a></li>
+                <li><a href="scan_book.html"><i class="fas fa-qrcode"></i> Quét mã sách</a></li>
+                <li><a href="manage_borrow.html"><i class="fas fa-clipboard-list"></i> Quản lý mượn</a></li>
             </ul>
         </nav>
     </header>
@@ -290,7 +419,7 @@
     </div>
     
     <footer>
-        <p>&copy; 2023 Hệ thống quản lý thư viện H44. All rights reserved.</p>
+        <p><i class="far fa-copyright"></i> 2023 Hệ thống quản lý thư viện H44. All rights reserved.</p>
     </footer>
     
     <script>
@@ -313,6 +442,21 @@
         let videoStream = null;
         const scannedBooks = {};
         let animationFrameId = null;
+        
+        // Toggle menu mobile
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+            
+            const hamburger = document.querySelector('.hamburger i');
+            if (navLinks.classList.contains('active')) {
+                hamburger.classList.remove('fa-bars');
+                hamburger.classList.add('fa-times');
+            } else {
+                hamburger.classList.remove('fa-times');
+                hamburger.classList.add('fa-bars');
+            }
+        }
         
         // Bắt đầu/dừng quét
         function toggleScanner() {
@@ -350,7 +494,7 @@
                 
             } catch (err) {
                 console.error('Lỗi khi truy cập camera:', err);
-                showMessage('Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.', 'error');
+                showMessage('<i class="fas fa-exclamation-triangle"></i> Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.', 'error');
             }
         }
         
@@ -421,11 +565,11 @@
                         updateConfirmButton();
                     }
                 } else {
-                    showMessage(`Không tìm thấy sách với mã ${bookId}`, 'error');
+                    showMessage(`<i class="fas fa-book-dead"></i> Không tìm thấy sách với mã ${bookId}`, 'error');
                 }
             } catch (error) {
                 console.error('Lỗi khi kiểm tra sách:', error);
-                showMessage('Có lỗi xảy ra khi kiểm tra sách', 'error');
+                showMessage('<i class="fas fa-exclamation-circle"></i> Có lỗi xảy ra khi kiểm tra sách', 'error');
             }
         }
         
@@ -439,21 +583,21 @@
                 
                 html += `
                     <div class="book-card" data-id="${bookId}">
-                        <h3>${book.bookName}</h3>
+                        <h3><i class="fas fa-book"></i> ${book.bookName}</h3>
                         <div class="book-info">
                             <div>
-                                <p><strong>Mã sách:</strong> ${bookId}</p>
-                                <p><strong>Tổng số lượng:</strong> ${book.totalQuantity}</p>
+                                <p><strong><i class="fas fa-barcode"></i> Mã sách:</strong> ${bookId}</p>
+                                <p><strong><i class="fas fa-boxes"></i> Tổng số lượng:</strong> ${book.totalQuantity}</p>
                             </div>
                             <div>
-                                <p><strong>Đã mượn:</strong> ${book.borrowedQuantity}</p>
-                                <p><strong>Còn lại:</strong> ${book.availableQuantity}</p>
+                                <p><strong><i class="fas fa-sign-out-alt"></i> Đã mượn:</strong> ${book.borrowedQuantity}</p>
+                                <p><strong><i class="fas fa-check-circle"></i> Còn lại:</strong> ${book.availableQuantity}</p>
                             </div>
                         </div>
                         
                         <div class="borrow-form">
                             <div class="form-group">
-                                <label for="borrower-${bookId}">Người mượn:</label>
+                                <label for="borrower-${bookId}"><i class="fas fa-user"></i> Người mượn:</label>
                                 <input type="text" id="borrower-${bookId}" 
                                        placeholder="Tên người mượn"
                                        value="${scannedBooks[bookId].borrowerName}"
@@ -461,7 +605,7 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="quantity-${bookId}">Số lượng mượn:</label>
+                                <label for="quantity-${bookId}"><i class="fas fa-calculator"></i> Số lượng mượn:</label>
                                 <input type="number" id="quantity-${bookId}" 
                                        min="1" max="${book.availableQuantity}" 
                                        value="${borrowQty}"
@@ -469,14 +613,14 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="startDate-${bookId}">Ngày bắt đầu:</label>
+                                <label for="startDate-${bookId}"><i class="far fa-calendar-alt"></i> Ngày bắt đầu:</label>
                                 <input type="date" id="startDate-${bookId}" 
                                        value="${scannedBooks[bookId].startDate}"
                                        onchange="updateStartDate('${bookId}', this.value)">
                             </div>
                             
                             <div class="form-group">
-                                <label for="duration-${bookId}">Thời gian mượn (ngày):</label>
+                                <label for="duration-${bookId}"><i class="far fa-clock"></i> Thời gian mượn (ngày):</label>
                                 <input type="number" id="duration-${bookId}" 
                                        min="1" value="${scannedBooks[bookId].duration}"
                                        onchange="updateDuration('${bookId}', this.value)">
@@ -530,7 +674,7 @@
             const messageEl = document.getElementById('message');
             
             if (Object.keys(scannedBooks).length === 0) {
-                showMessage('Vui lòng quét ít nhất một cuốn sách', 'error');
+                showMessage('<i class="fas fa-exclamation-circle"></i> Vui lòng quét ít nhất một cuốn sách', 'error');
                 return;
             }
             
@@ -552,12 +696,12 @@
                     const duration = document.getElementById(`duration-${bookId}`).value;
                     
                     if (!borrowerName) {
-                        showMessage('Vui lòng nhập tên người mượn cho tất cả sách', 'error');
+                        showMessage('<i class="fas fa-user-times"></i> Vui lòng nhập tên người mượn cho tất cả sách', 'error');
                         return;
                     }
                     
                     if (borrowQty > bookData.availableQuantity) {
-                        showMessage(`Số lượng mượn vượt quá số lượng có sẵn cho sách ${bookData.bookName}`, 'error');
+                        showMessage(`<i class="fas fa-exclamation-triangle"></i> Số lượng mượn vượt quá số lượng có sẵn cho sách ${bookData.bookName}`, 'error');
                         return;
                     }
                     
@@ -586,7 +730,7 @@
                 
                 await batch.commit();
                 
-                showMessage('Đã ghi nhận mượn sách thành công!', 'success');
+                showMessage('<i class="fas fa-check-circle"></i> Đã ghi nhận mượn sách thành công!', 'success');
                 
                 for (const bookId in scannedBooks) {
                     delete scannedBooks[bookId];
@@ -600,13 +744,13 @@
                 
             } catch (error) {
                 console.error('Lỗi khi xác nhận mượn sách:', error);
-                showMessage('Có lỗi xảy ra khi xác nhận mượn sách. Vui lòng thử lại.', 'error');
+                showMessage('<i class="fas fa-times-circle"></i> Có lỗi xảy ra khi xác nhận mượn sách. Vui lòng thử lại.', 'error');
             }
         }
         
         function showMessage(text, type) {
             const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
+            messageEl.innerHTML = text;
             messageEl.className = 'message ' + type;
             messageEl.style.display = 'block';
             
