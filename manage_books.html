@@ -3,87 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý sách - Thư viện</title>
+    <title>Quản lý sách - Thư viện H44</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
+        :root {
+            --primary-color: #4285F4;
+            --secondary-color: #34A853;
+            --accent-color: #EA4335;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
         h1 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
             text-align: center;
         }
+        
+        .search-container {
+            display: flex;
+            margin-bottom: 1.5rem;
+            gap: 10px;
+        }
+        
+        .search-container input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+        
+        .search-container button {
+            padding: 0 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .search-container button:hover {
+            background-color: #3367d6;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 1rem;
         }
+        
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            padding: 12px 15px;
             text-align: left;
+            border-bottom: 1px solid #ddd;
         }
+        
         th {
-            background-color: #f2f2f2;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+        
+        tr:hover {
+            background-color: #f5f5f5;
         }
-        .edit-btn, .save-btn, .cancel-btn {
-            padding: 5px 10px;
-            margin: 0 5px;
+        
+        .btn {
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
             cursor: pointer;
-        }
-        .edit-btn {
-            background-color: #4CAF50;
-            color: white;
+            transition: all 0.3s;
             border: none;
+            margin-right: 5px;
         }
-        .save-btn {
-            background-color: #2196F3;
+        
+        .btn-edit {
+            background-color: var(--primary-color);
             color: white;
-            border: none;
         }
-        .cancel-btn {
-            background-color: #f44336;
+        
+        .btn-save {
+            background-color: var(--secondary-color);
             color: white;
-            border: none;
         }
-        .search-container {
-            margin-bottom: 20px;
+        
+        .btn-cancel {
+            background-color: var(--accent-color);
+            color: white;
         }
-        #searchInput {
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        input[type="text"], 
+        input[type="number"] {
+            width: 100%;
             padding: 8px;
-            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+        }
+        
+        .message {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .nav-links {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Quản lý sách trong thư viện</h1>
+    <header>
+        <nav>
+            <div class="logo">Thư Viện H44</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Trang chủ</a></li>
+                <li><a href="add_book.html">Thêm sách</a></li>
+                <li><a href="manage_books.html">Quản lý sách</a></li>
+                <li><a href="scan_book.html">Quét mã sách</a></li>
+                <li><a href="manage_borrow.html">Quản lý mượn</a></li>
+            </ul>
+        </nav>
+    </header>
     
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Tìm kiếm sách...">
-        <button onclick="searchBooks()">Tìm kiếm</button>
+    <div class="container">
+        <div class="card">
+            <h1><i class="fas fa-book"></i> Quản lý sách trong thư viện</h1>
+            
+            <div id="message" class="message" style="display: none;"></div>
+            
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm sách...">
+                <button onclick="searchBooks()"><i class="fas fa-search"></i></button>
+            </div>
+            
+            <div class="table-responsive">
+                <table id="booksTable">
+                    <thead>
+                        <tr>
+                            <th>Mã sách</th>
+                            <th>Tên sách</th>
+                            <th>Tổng số lượng</th>
+                            <th>Đã mượn</th>
+                            <th>Còn lại</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksList">
+                        <!-- Dữ liệu sách sẽ được thêm vào đây -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     
-    <table id="booksTable">
-        <thead>
-            <tr>
-                <th>Mã sách</th>
-                <th>Tên sách</th>
-                <th>Tổng số lượng</th>
-                <th>Đã mượn</th>
-                <th>Còn lại</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody id="booksList">
-            <!-- Dữ liệu sách sẽ được thêm vào đây -->
-        </tbody>
-    </table>
+    <footer>
+        <p>&copy; 2023 Hệ thống quản lý thư viện H44. All rights reserved.</p>
+    </footer>
     
     <script>
         // Khởi tạo Firebase
@@ -93,7 +281,8 @@
             projectId: "h44-tl-235c9",
             storageBucket: "h44-tl-235c9.firebasestorage.app",
             messagingSenderId: "20760907411",
-            appId: "1:20760907411:web:20b3a1cc1fbfbf57c78766"
+            appId: "1:20760907411:web:20b3a1cc1fbfbf57c78766",
+            measurementId: "G-8JSWED9TPW"
         };
         
         firebase.initializeApp(firebaseConfig);
@@ -103,14 +292,24 @@
         function fetchBooks(searchTerm = '') {
             let query = db.collection('books');
             
-            if (searchTerm) {
-                query = query.where('bookName', '>=', searchTerm)
-                            .where('bookName', '<=', searchTerm + '\uf8ff');
+            if (searchTerm && typeof searchTerm === 'string' && searchTerm.trim() !== '') {
+                const term = searchTerm.trim();
+                query = query.where('bookName', '>=', term)
+                            .where('bookName', '<=', term + '\uf8ff');
             }
             
             query.onSnapshot((snapshot) => {
                 const booksList = document.getElementById('booksList');
                 booksList.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    booksList.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Không tìm thấy sách nào</td>
+                        </tr>
+                    `;
+                    return;
+                }
                 
                 snapshot.forEach((doc) => {
                     const book = doc.data();
@@ -124,19 +323,30 @@
                         <td>${book.borrowedQuantity}</td>
                         <td>${book.availableQuantity}</td>
                         <td>
-                            <button class="edit-btn" onclick="editBook('${doc.id}')">Sửa</button>
+                            <button class="btn btn-edit" onclick="editBook('${doc.id}')">
+                                <i class="fas fa-edit"></i> Sửa
+                            </button>
                         </td>
                     `;
                     
                     booksList.appendChild(row);
                 });
+            }, (error) => {
+                console.error('Lỗi khi lấy dữ liệu sách:', error);
+                showMessage('Có lỗi xảy ra khi tải danh sách sách', 'error');
             });
         }
         
         // Tìm kiếm sách
         function searchBooks() {
-            const searchTerm = document.getElementById('searchInput').value;
-            fetchBooks(searchTerm);
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput ? searchInput.value : '';
+            
+            if (searchTerm && searchTerm.trim() !== '') {
+                fetchBooks(searchTerm.trim());
+            } else {
+                fetchBooks();
+            }
         }
         
         // Chỉnh sửa sách
@@ -156,8 +366,12 @@
             
             // Thay đổi nút hành động
             cells[5].innerHTML = `
-                <button class="save-btn" onclick="saveBook('${bookId}')">Lưu</button>
-                <button class="cancel-btn" onclick="cancelEdit('${bookId}', '${originalValues.bookName}', '${originalValues.totalQuantity}')">Hủy</button>
+                <button class="btn btn-save" onclick="saveBook('${bookId}')">
+                    <i class="fas fa-save"></i> Lưu
+                </button>
+                <button class="btn btn-cancel" onclick="cancelEdit('${bookId}', '${originalValues.bookName}', '${originalValues.totalQuantity}')">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
             `;
         }
         
@@ -169,16 +383,25 @@
             cells[1].textContent = originalName;
             cells[2].textContent = originalTotal;
             
-            cells[5].innerHTML = `<button class="edit-btn" onclick="editBook('${bookId}')">Sửa</button>`;
+            cells[5].innerHTML = `
+                <button class="btn btn-edit" onclick="editBook('${bookId}')">
+                    <i class="fas fa-edit"></i> Sửa
+                </button>
+            `;
         }
         
         // Lưu thay đổi
         async function saveBook(bookId) {
-            const newName = document.getElementById('editName').value;
+            const newName = document.getElementById('editName').value.trim();
             const newTotal = parseInt(document.getElementById('editTotal').value);
             
-            if (!newName || !newTotal) {
-                alert('Vui lòng điền đầy đủ thông tin');
+            if (!newName || isNaN(newTotal)) {
+                showMessage('Vui lòng điền đầy đủ thông tin', 'error');
+                return;
+            }
+            
+            if (newTotal <= 0) {
+                showMessage('Số lượng phải lớn hơn 0', 'error');
                 return;
             }
             
@@ -191,24 +414,10 @@
                 const borrowed = bookData.borrowedQuantity || 0;
                 const newAvailable = newTotal - borrowed;
                 
+                if (newAvailable < 0) {
+                    showMessage('Số lượng tổng không thể nhỏ hơn số đã mượn', 'error');
+                    return;
+                }
+                
                 // Cập nhật Firestore
-                await db.collection('books').doc(bookId).update({
-                    bookName: newName,
-                    totalQuantity: newTotal,
-                    availableQuantity: newAvailable
-                });
-                
-                // Tải lại danh sách
-                fetchBooks();
-                
-            } catch (error) {
-                console.error('Lỗi khi cập nhật sách:', error);
-                alert('Có lỗi xảy ra khi cập nhật sách. Vui lòng thử lại.');
-            }
-        }
-        
-        // Tải danh sách sách khi trang được tải
-        window.onload = fetchBooks;
-    </script>
-</body>
-</html>
+                await db.co
