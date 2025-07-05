@@ -48,11 +48,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
         
         .logo {
             font-size: 1.5rem;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
         }
         
         .nav-links {
@@ -80,52 +89,11 @@
             background-color: rgba(255, 255, 255, 0.2);
         }
         
-        .mobile-menu-btn {
+        .hamburger {
             display: none;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
             cursor: pointer;
-        }
-        
-        .mobile-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: white;
-            width: 250px;
-            border-radius: 0 0 0 var(--border-radius);
-            box-shadow: -2px 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            overflow: hidden;
-        }
-        
-        .mobile-menu.open {
-            display: block;
-        }
-        
-        .mobile-menu ul {
-            list-style: none;
-        }
-        
-        .mobile-menu li {
-            border-bottom: 1px solid #eee;
-        }
-        
-        .mobile-menu a {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 1rem;
-            color: var(--dark-color);
-            text-decoration: none;
-            transition: background-color 0.3s;
-        }
-        
-        .mobile-menu a:hover {
-            background-color: #f5f5f5;
+            font-size: 1.5rem;
+            padding: 10px;
         }
         
         .hero {
@@ -212,12 +180,36 @@
             margin-top: 3rem;
         }
         
+        /* Responsive styles */
         @media (max-width: 768px) {
             .nav-links {
-                display: none;
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                background-color: var(--primary-color);
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem 0;
+                transition: all 0.3s ease;
+                z-index: 1000;
             }
             
-            .mobile-menu-btn {
+            .nav-links.active {
+                left: 0;
+            }
+            
+            .nav-links li {
+                margin: 1rem 0;
+            }
+            
+            .nav-links a {
+                font-size: 1.2rem;
+                padding: 1rem 2rem;
+            }
+            
+            .hamburger {
                 display: block;
             }
             
@@ -234,30 +226,24 @@
 </head>
 <body>
     <header>
-        <div class="container">
-            <nav>
-                <div class="logo">Thư Viện H44</div>
-                <ul class="nav-links">
-                    <li><a href="index.html"><i class="fas fa-home"></i> Trang chủ</a></li>
-                    <li><a href="add_book.html"><i class="fas fa-book-medical"></i> Thêm sách</a></li>
-                    <li><a href="manage_books.html"><i class="fas fa-book"></i> Quản lý sách</a></li>
-                    <li><a href="scan_book.html"><i class="fas fa-qrcode"></i> Quét mã sách</a></li>
-                    <li><a href="manage_borrow.html"><i class="fas fa-clipboard-list"></i> Quản lý mượn</a></li>
-                </ul>
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="mobile-menu" id="mobileMenu">
-                    <ul>
-                        <li><a href="index.html"><i class="fas fa-home"></i> Trang chủ</a></li>
-                        <li><a href="add_book.html"><i class="fas fa-book-medical"></i> Thêm sách</a></li>
-                        <li><a href="manage_books.html"><i class="fas fa-book"></i> Quản lý sách</a></li>
-                        <li><a href="scan_book.html"><i class="fas fa-qrcode"></i> Quét mã sách</a></li>
-                        <li><a href="manage_borrow.html"><i class="fas fa-clipboard-list"></i> Quản lý mượn</a></li>
-                    </ul>
-                </div>
-            </nav>
-        </div>
+        <nav>
+            <div class="logo">
+                <i class="fas fa-book-open"></i>
+                <span>Thư Viện H44</span>
+            </div>
+            
+            <div class="hamburger" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
+            
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html"><i class="fas fa-home"></i> Trang chủ</a></li>
+                <li><a href="add_book.html"><i class="fas fa-book-medical"></i> Thêm sách</a></li>
+                <li><a href="manage_books.html"><i class="fas fa-book"></i> Quản lý sách</a></li>
+                <li><a href="scan_book.html"><i class="fas fa-qrcode"></i> Quét mã sách</a></li>
+                <li><a href="manage_borrow.html"><i class="fas fa-clipboard-list"></i> Quản lý mượn</a></li>
+            </ul>
+        </nav>
     </header>
     
     <section class="hero">
@@ -294,20 +280,20 @@
     </footer>
 
     <script>
-        // Mobile menu functionality
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        
-        mobileMenuBtn.addEventListener('click', function() {
-            mobileMenu.classList.toggle('open');
-        });
-        
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(event) {
-            if (!mobileMenu.contains(event.target) && event.target !== mobileMenuBtn) {
-                mobileMenu.classList.remove('open');
+        // Toggle menu mobile
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+            
+            const hamburger = document.querySelector('.hamburger i');
+            if (navLinks.classList.contains('active')) {
+                hamburger.classList.remove('fa-bars');
+                hamburger.classList.add('fa-times');
+            } else {
+                hamburger.classList.remove('fa-times');
+                hamburger.classList.add('fa-bars');
             }
-        });
+        }
     </script>
 </body>
 </html>
