@@ -37,6 +37,7 @@
             color: white;
             padding: 1rem 0;
             box-shadow: var(--box-shadow);
+            position: relative;
         }
         
         .container {
@@ -75,10 +76,61 @@
             padding: 0.5rem 1rem;
             border-radius: var(--border-radius);
             transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .nav-links a:hover {
             background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .mobile-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            width: 250px;
+            border-radius: 0 0 0 var(--border-radius);
+            box-shadow: -2px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            overflow: hidden;
+        }
+        
+        .mobile-menu.open {
+            display: block;
+        }
+        
+        .mobile-menu ul {
+            list-style: none;
+        }
+        
+        .mobile-menu li {
+            border-bottom: 1px solid #eee;
+        }
+        
+        .mobile-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 1rem;
+            color: var(--dark-color);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .mobile-menu a:hover {
+            background-color: #f5f5f5;
         }
         
         .card {
@@ -93,6 +145,10 @@
             color: var(--primary-color);
             margin-bottom: 1.5rem;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .search-container {
@@ -117,6 +173,9 @@
             border-radius: var(--border-radius);
             cursor: pointer;
             transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .search-container button:hover {
@@ -153,6 +212,9 @@
             transition: all 0.3s;
             border: none;
             margin-right: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .btn-edit {
@@ -221,6 +283,23 @@
             .nav-links {
                 display: none;
             }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-container button {
+                justify-content: center;
+                padding: 0.8rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -229,12 +308,24 @@
         <nav>
             <div class="logo">Thư Viện H44</div>
             <ul class="nav-links">
-                <li><a href="index.html">Trang chủ</a></li>
-                <li><a href="add_book.html">Thêm sách</a></li>
-                <li><a href="manage_books.html">Quản lý sách</a></li>
-                <li><a href="scan_book.html">Quét mã sách</a></li>
-                <li><a href="manage_borrow.html">Quản lý mượn</a></li>
+                <li><a href="index.html"><i class="fas fa-home"></i> Trang chủ</a></li>
+                <li><a href="add_book.html"><i class="fas fa-book-medical"></i> Thêm sách</a></li>
+                <li><a href="manage_books.html"><i class="fas fa-book"></i> Quản lý sách</a></li>
+                <li><a href="scan_book.html"><i class="fas fa-qrcode"></i> Quét mã sách</a></li>
+                <li><a href="manage_borrow.html"><i class="fas fa-clipboard-list"></i> Quản lý mượn</a></li>
             </ul>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="mobile-menu" id="mobileMenu">
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-home"></i> Trang chủ</a></li>
+                    <li><a href="add_book.html"><i class="fas fa-book-medical"></i> Thêm sách</a></li>
+                    <li><a href="manage_books.html"><i class="fas fa-book"></i> Quản lý sách</a></li>
+                    <li><a href="scan_book.html"><i class="fas fa-qrcode"></i> Quét mã sách</a></li>
+                    <li><a href="manage_borrow.html"><i class="fas fa-clipboard-list"></i> Quản lý mượn</a></li>
+                </ul>
+            </div>
         </nav>
     </header>
     
@@ -246,7 +337,7 @@
             
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Tìm kiếm sách...">
-                <button onclick="searchBooks()"><i class="fas fa-search"></i></button>
+                <button onclick="searchBooks()"><i class="fas fa-search"></i> Tìm kiếm</button>
             </div>
             
             <div class="table-responsive">
@@ -288,6 +379,21 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileMenu.classList.toggle('open');
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!mobileMenu.contains(event.target) && event.target !== mobileMenuBtn) {
+                mobileMenu.classList.remove('open');
+            }
+        });
+
         // Lấy danh sách sách
         function fetchBooks(searchTerm = '') {
             let query = db.collection('books');
